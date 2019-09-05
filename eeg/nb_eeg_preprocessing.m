@@ -4,8 +4,8 @@ function nb_eeg_preprocessing(fnames, outdir)
 % detrends, re-references (to the median) and saves data in Fieldtrip structure.
 %
 % INPUTS
-% - data2prepro: paths to continous EEG recordings
-% - outdir: directory to move data to
+% - fnames: full filenames to continous EEG recordings
+% - outdir: directory to move preprocessed EEG to
 %
 % OUTPUTS
 % - EEG in Fieldtrip format
@@ -28,8 +28,6 @@ if nargin <1
     fnames = spm_select(Inf,'.mat$','Select data to preprocess...');
     outdir = spm_select(Inf,'dir','Select output directory...');
 end
-
-
 
 %% Preprocess
 %-------------------------------------------------------------------------
