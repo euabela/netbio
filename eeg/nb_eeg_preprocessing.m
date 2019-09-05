@@ -1,8 +1,7 @@
-function nb_eeg_preprocessing(eeg2prepro, outdir)
+function nb_eeg_preprocessing(fnames, outdir)
 % PURPOSE 
-% Preprocesses raw EEG data available in BrainVision % format. It
-% homogenises channel names, detrends, re-references (to the median) and
-% saves data in Fieldtrip structure.
+% Preprocesses raw EEG data available in BrainVision format.
+% detrends, re-references (to the median) and saves data in Fieldtrip structure.
 %
 % INPUTS
 % - data2prepro: paths to continous EEG recordings
@@ -12,67 +11,35 @@ function nb_eeg_preprocessing(eeg2prepro, outdir)
 % - EEG in Fieldtrip format
 %
 % DEPENDENCIES
-% - SPM12
-% - FieldTrip
-% - Noise Tools 
+% - SPM12 (https://www.fil.ion.ucl.ac.uk/spm/)
+% - FieldTrip (fieldtriptoolbox.org)
 %
 % USAGE
-% - Can be used with or without arguments
-%
 % >> nb_eeg_preprocessesing;
 % >> nb_eeg_preprocessing('myeeg.mat','mydrive/mydir');
 %
-%--------------------------------------------------------------------------
+%------------------------------------------------------------------------
 % (c) Eugenio Abela, MD / Richardson Lab
-%
-
 
 %% Select data and output directory
-%-------------------------------------------------------
+%------------------------------------------------------------------------
 
 if nargin <1
-    eeg2prepro = spm_select(Inf,'.mat$','Select data to preprocess...');
-    outdir     = spm_select(Inf,'dir','Select output directory...');
+    fnames = spm_select(Inf,'.mat$','Select data to preprocess...');
+    outdir = spm_select(Inf,'dir','Select output directory...');
 end
 
 
 
 %% Preprocess
-%=========================================================================
+%-------------------------------------------------------------------------
 
-for filenum = 1:size(eeg2prepro,1)
+for fi = 1:size(fnames,1)
     
     % Load data
-    %----------------------------------------------------------------------
-    load(deblank(eeg2prepro(filenum,:)));
-    
-    % Initialise data structure
-    %----------------------------------------------------------------------
-    eeg = [];
-    
-    % Clean,reorder, and re-assign channel labels
-    %----------------------------------------------------------------------
-    oldLabels = struct2cell(EEG.chanlocs)';
-    
-    if strcmp(EEG.chanlocs(1).labels, 'Fp1 - Ref')==1
-        newLabels = regexprep(oldLabels,' - Ref','');
-    else
-        newLabels = regexprep(oldLabels,' - AVG','');
-    end 
-  
-    [~,idx]   = ismember(stdLabels,newLabels);
-    eeg.label = newLabels(idx);
-    eeg.label = eeg.label(:);
-    
-    % Reorder and assign data matrix
-    %----------------------------------------------------------------------
-    eeg.fsample = EEG.srate;
-     
-    for i = 1:length(EEG.trials)
-        data = EEG.data(idx,:); 
-        eeg.trial{i} = squeeze(data(:, :, i));
-        eeg.time{i}  = (1:EEG.pnts)/EEG.srate;
-    end
+    %---------------------------------------------------------------------- 
+    cfg            = [],
+    cfg.dataset    =(fnames(fi,:));
     
     % Detrend and re-reference to median (less prone to outliers)
     %----------------------------------------------------------------------  
@@ -83,13 +50,10 @@ for filenum = 1:size(eeg2prepro,1)
     cfg.refmethod  = 'median';
     eeg            = ft_preprocessing(cfg,eeg);
     
-    % Downsample to 256 Hz
+    % Downsample
     %----------------------------------------------------------------------  
-    % Often superfluous, because our data have low sampling rate anyway -
-    % this is just to make absolutely sure every file has the same sampling
-    % rate. Overwrite structure above.
     cfg            = [];
-    cfg.resamplefs = 256;
+    cfg.resamplefs = 1000;
     eeg            = ft_resampledata(cfg,eeg);
 
     % Rename and save as Fieldtrip data structure
@@ -108,4 +72,3 @@ for filenum = 1:size(eeg2prepro,1)
     save(outname,'eeg');
     
 end
-%% End
