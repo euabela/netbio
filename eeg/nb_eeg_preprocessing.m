@@ -1,5 +1,6 @@
-function gge_preprocessing(eeg2prepro, outdir)
-% Preprocesses original EEG data available in EEGLAB.mat format. It
+function nb_eeg_preprocessing(eeg2prepro, outdir)
+% PURPOSE 
+% Preprocesses raw EEG data available in BrainVision % format. It
 % homogenises channel names, detrends, re-references (to the median) and
 % saves data in Fieldtrip structure.
 %
@@ -11,37 +12,30 @@ function gge_preprocessing(eeg2prepro, outdir)
 % - EEG in Fieldtrip format
 %
 % DEPENDENCIES
-% - SPM12 (optional)
-% - Fieldtrip
+% - SPM12
+% - FieldTrip
+% - Noise Tools 
 %
 % USAGE
 % - Can be used with or without arguments
 %
-% >> td_preprocessesing;
-% >> td_preprocessing('myeeg.mat','mydrive/mydir');
+% >> nb_eeg_preprocessesing;
+% >> nb_eeg_preprocessing('myeeg.mat','mydrive/mydir');
 %
 %--------------------------------------------------------------------------
 % (c) Eugenio Abela, MD / Richardson Lab
 %
-% Version history:
-%
-% 19/02/20 Renamed
-% 19/01/12 Improved data I/O, improved description for readability
-% 18/05/09 Renamed variables for consistency
-% 18/05/08 Minor edits for temporal dynamics project
-% 17/11/20 Added comments, improved data names for saving
-% 17/09/09 Initial version
 
 
-%% Select data and output directory, define standard channel labels
-%=========================================================================
+%% Select data and output directory
+%-------------------------------------------------------
+
 if nargin <1
     eeg2prepro = spm_select(Inf,'.mat$','Select data to preprocess...');
     outdir     = spm_select(Inf,'dir','Select output directory...');
 end
 
-stdLabels   = {'Fp2';'Fp1';'F8';'F4';'Fz';'F3';'F7';'T4';'C4';'Cz';'C3';...
-    'T3';'T6';'P4';'Pz';'P3';'T5';'O2';'O1'};
+
 
 %% Preprocess
 %=========================================================================
